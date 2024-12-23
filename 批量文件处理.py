@@ -11,30 +11,12 @@ import re
 import shutil
 
 
-def change_extension(directory, new_extension):
-    """
-    更改指定目录下的所有文件扩展名
-    :param directory: 路径
-    :param new_extension: 新的扩展名
-    :return:
-    """
-    # 遍历指定目录及其子目录下的所有文件
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            # 获取文件的完整路径
-            file_path = os.path.join(root, file)
-            # 获取文件的扩展名
-            _, ext = os.path.splitext(file_path)
-            # 如果文件扩展名不是指定的后缀，则更改扩展名为指定的后缀
-            if ext.lower() != f'.{new_extension.lower()}':
-                # 构造新的文件名
-                new_file_path = os.path.splitext(file_path)[0] + f'.{new_extension}'
-                # 重命名文件
-                os.rename(file_path, new_file_path)
-                print(f'Renamed "{file_path}" to "{new_file_path}"')
-
-
 def move_files_to_parent(folder_path):
+    """
+    将指定目录下的所有文件移动到该目录下（递归）
+    :param folder_path: 指定目录
+    :return: None
+    """
     # 获取文件夹中的所有文件和子文件夹
     for item in os.listdir(folder_path):
         # 构建完整的文件或文件夹路径
@@ -83,6 +65,7 @@ def rename_files(directory):
             elif e_match_ex:
                 e_number_ex = e_match_ex.group(1)
                 new_name += f"第{e_number_ex}集"
+            new_name += os.path.splitext(filename)[1]
 
             if not new_name == base_name:
                 new_file_path = os.path.join(directory, new_name)
@@ -90,7 +73,24 @@ def rename_files(directory):
                 print(f'Renamed "{file_path}" to "{new_file_path}"')
 
 
-if __name__ == '__main__':
-    directory_path = r'C:\Users\void_pc\Downloads\三国演义'
-    rename_files(directory_path)
+def change_extension(directory, new_extension) -> None:
+    """
+    批量更改指定目录下的所有文件扩展名
+    :param directory: 指定目录
+    :param new_extension: 新的扩展名
+    :return: None
+    """
 
+    for filename in os.listdir(directory):
+        file_path = os.path.join(directory, filename)
+        if os.path.isfile(file_path):
+            _, ext = os.path.splitext(file_path)
+            if ext.lower() != f'.{new_extension.lower()}':
+                new_file_path = os.path.splitext(file_path)[0] + f'.{new_extension}'
+                os.rename(file_path, new_file_path)
+                print(f'Renamed "{file_path}" to "{new_file_path}"')
+
+
+if __name__ == '__main__':
+    directory_path = r'C:\Users\void_pc\Downloads\龙门镖局'
+    change_extension(directory_path, 'mp4')
