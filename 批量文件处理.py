@@ -65,6 +65,8 @@ def rename_files(directory):
             elif e_match_ex:
                 e_number_ex = e_match_ex.group(1)
                 new_name += f"第{e_number_ex}集"
+            else:
+                continue
             new_name += os.path.splitext(filename)[1]
 
             if not new_name == base_name:
@@ -92,5 +94,5 @@ def change_extension(directory, new_extension) -> None:
 
 
 if __name__ == '__main__':
-    directory_path = r'C:\Users\void_pc\Downloads\龙门镖局'
-    change_extension(directory_path, 'mp4')
+    directory_path = r'C:\Users\void_pc\Downloads\假如'
+    rename_files(directory_path)
