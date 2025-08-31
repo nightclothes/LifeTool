@@ -1,6 +1,8 @@
 import os
 import re
 from pathlib import Path
+import logging
+from src.log import get_logger
 
 def batch_rename_tv_series(folder_path):
     """
@@ -10,23 +12,26 @@ def batch_rename_tv_series(folder_path):
     @param folder_path: 电视剧文件夹的路径
     @return: 重命名结果统计信息
     """
+    # 创建日志记录器
+    logger = get_logger(logging.INFO, "BatchRename")
+    
     try:
         # 转换为Path对象
         folder = Path(folder_path)
         
         if not folder.exists() or not folder.is_dir():
-            print(f"错误：文件夹 '{folder_path}' 不存在或不是有效目录")
+            logger.error(f"文件夹 '{folder_path}' 不存在或不是有效目录")
             return False
         
         # 获取文件夹名称作为电视剧名
         series_name = folder.name
-        print(f"开始处理电视剧：{series_name}")
+        logger.info(f"开始处理电视剧：{series_name}")
         
         # 获取文件夹中的所有文件
         files = [f for f in folder.iterdir() if f.is_file()]
         
         if not files:
-            print("文件夹中没有找到任何文件")
+            logger.warning("文件夹中没有找到任何文件")
             return False
         
         renamed_count = 0
@@ -40,7 +45,7 @@ def batch_rename_tv_series(folder_path):
             # 跳过非视频文件（可根据需要调整扩展名列表）
             video_extensions = {'.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm', '.m4v', '.ts', '.rmvb'}
             if file_extension.lower() not in video_extensions:
-                print(f"跳过非视频文件：{file_path.name}")
+                logger.debug(f"跳过非视频文件：{file_path.name}")
                 skipped_count += 1
                 continue
             
@@ -48,7 +53,7 @@ def batch_rename_tv_series(folder_path):
             season, episode = extract_season_episode(file_name)
             
             if season is None or episode is None:
-                print(f"无法识别季集信息，跳过文件：{file_path.name}")
+                logger.warning(f"无法识别季集信息，跳过文件：{file_path.name}")
                 skipped_count += 1
                 continue
             
@@ -58,27 +63,25 @@ def batch_rename_tv_series(folder_path):
             
             # 检查新文件名是否已存在
             if new_path.exists() and new_path != file_path:
-                print(f"目标文件已存在，跳过：{new_name}")
+                logger.warning(f"目标文件已存在，跳过：{new_name}")
                 skipped_count += 1
                 continue
             
             # 重命名文件
             try:
                 file_path.rename(new_path)
-                print(f"重命名成功：{file_path.name} -> {new_name}")
+                logger.info(f"重命名成功：{file_path.name} -> {new_name}")
                 renamed_count += 1
             except Exception as e:
-                print(f"重命名失败：{file_path.name} - {str(e)}")
+                logger.error(f"重命名失败：{file_path.name} - {str(e)}")
                 skipped_count += 1
         
-        print(f"\n处理完成！")
-        print(f"成功重命名：{renamed_count} 个文件")
-        print(f"跳过文件：{skipped_count} 个文件")
+        logger.info(f"处理完成！成功重命名：{renamed_count} 个文件，跳过文件：{skipped_count} 个文件")
         
         return True
         
     except Exception as e:
-        print(f"处理过程中发生错误：{str(e)}")
+        logger.error(f"处理过程中发生错误：{str(e)}")
         return False
 
 def extract_season_episode(filename):
@@ -122,23 +125,26 @@ def main():
     """
     主函数，用于测试批量重命名功能
     """
-    print("电视剧文件批量重命名工具")
-    print("=" * 30)
+    # 创建日志记录器
+    logger = get_logger(logging.INFO, "BatchRenameMain")
+    
+    logger.info("电视剧文件批量重命名工具启动")
+    logger.info("=" * 30)
     
     # 获取用户输入的文件夹路径
     folder_path = input("请输入电视剧文件夹路径：").strip()
     
     if not folder_path:
-        print("路径不能为空！")
+        logger.error("路径不能为空！")
         return
     
     # 执行批量重命名
     success = batch_rename_tv_series(folder_path)
     
     if success:
-        print("\n重命名操作完成！")
+        logger.info("重命名操作完成！")
     else:
-        print("\n重命名操作失败！")
+        logger.error("重命名操作失败！")
 
 if __name__ == "__main__":
     main()
